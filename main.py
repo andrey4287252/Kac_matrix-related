@@ -6,6 +6,8 @@ debug = False
 def Kac_Matrix_element(m, l):
     '''
     Agregates given partitions m and l to one list and computes corresponding element of Kac-Shapovalov matrix
+    :param m: first partition
+    :param l: second partition
     '''
     L = list(map(int, l)) + list(map(lambda x: -int(x),  m))[::-1]
     return Auxilary_Kac_Matrix_element(L)
@@ -13,6 +15,8 @@ def Kac_Matrix_element(m, l):
 def Auxilary_Kac_Matrix_element(L):
     '''
     Returns element of Kac-Shapovalov matrix indexed by partitions agregated in L
+    :param L: list concatenated from pair of indexing partitions, where second inversed in sign and order.
+    :return: symbolical expression for element of form indexed by pair of partitions
     '''
     if debug:
         print("Partitons: ", L)
@@ -41,8 +45,16 @@ def Auxilary_Kac_Matrix_element(L):
 if '-d' in sys.argv[1:]:
     debug = True
 
-print("Enter first partition")
-a = list(map(int, list(map(float, input().split()))))
-print("Enter second partition")
-b = list(map(int, list(map(float, input().split()))))
-print(Kac_Matrix_element(a, b))
+def Kac_matrix(N):
+    '''
+    Gives Kac-Shapovalov matrix on N-th level.
+    :param N: size of the partitions enumerated in matrix
+    "return: matrix of Kac-Shapovalov form on n-th level
+    '''
+    partitions = list(sp.utilities.iterables.ordered_partitions(N))[::-1]
+    if debug:
+        print("partitions: ", partitions)
+    return sp.Matrix(len(partitions), len(partitions), lambda i,j: sp.factor(Kac_Matrix_element(partitions[i], partitions[j])))
+
+print("Enter level")
+print(Kac_matrix(int(input())))

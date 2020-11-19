@@ -69,15 +69,32 @@ def Kac_matrix(N, x, y, Liouville_parametrization=False):
 Liouville_parametrization = ('-L' in sys.argv[1:])
 if Liouville_parametrization:
     print("Enter a")
-    a = sp.symbols(str(input()))
+    a = input()
+    if not a.isnumeric():
+        a = sp.symbols(a)
+    else:
+        a = float(a)
     print("Enter b")
-    b = sp.symbols(str(input()))
+    b = input()
+    if not b.isnumeric():
+        b = sp.symbols(b)
+    else:
+        b = float(b)
+
     print("Enter level")
     print(Kac_matrix(int(input()), a, b, True))
 else:
-    print("Enter h")
-    h = sp.symbols(str(input()))
-    print("Enter c")
-    c = sp.symbols(str(input()))
+    print("Enter symbolycal expression for weight (energy)")
+    h = input()
+    if not h.isnumeric():
+        h = sp.symbols(h)
+    else:
+        h = float(h)
+    print("Enter symbolical expression for charge")
+    c = input()
+    if not c.isnumeric():
+        c = sp.symbols(c)
+    else:
+        c = float(c)
     print("Enter level")
     print(Kac_matrix(int(input()), h, c, False))

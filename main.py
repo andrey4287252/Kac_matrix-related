@@ -3,20 +3,16 @@ import sys
 
 debug = False
 
-def Kac_Matrix_element(m, l, x, y, Liouville_parametrization=False):
+def Kac_Matrix_element(m, l, x, y):
     '''
     Agregates given partitions m and l to one list and computes corresponding element of Kac-Shapovalov matrix
     :param m: first partition
     :param l: second partition
-    :param x: symbol corresponding to $\alpha$/energy with respect to parametrization
-    :param y: symbol corresponding to $\beta$/charge with respect to parametrization
-    :param Liouville_parametrization: if true expresses h and c in terms of a and b (with respect to known parametrization)
+    :param x: symbol corresponding energy
+    :param y: symbol corresponding charge
     '''
     L = list(map(int, l)) + list(map(lambda x: -int(x),  m))[::-1]
-    if Liouville_parametrization:
-        return Auxilary_Kac_Matrix_element(L, x*((y + 1/y)-x), 1+6*(y + 1/y)**2)
-    else:
-        return Auxilary_Kac_Matrix_element(L, x, y)
+    return Auxilary_Kac_Matrix_element(L, x, y)
 
 def Auxilary_Kac_Matrix_element(L, h, c):
     '''
@@ -49,52 +45,56 @@ def Auxilary_Kac_Matrix_element(L, h, c):
                     answ += (L[i]**3 - L[i])*c*Auxilary_Kac_Matrix_element(L[:i] + L[i + 2:], h, c)/12
                 return answ
 
-if '-d' in sys.argv[1:]:
-    debug = True
-
-def Kac_matrix(N, x, y, Liouville_parametrization=False):
+def Kac_matrix(N, x, y):
     '''
     Gives Kac-Shapovalov matrix on N-th level.
     :param N: size of the partitions enumerated in matrix
-    :param x: symbol corresponding to $\alpha$/energy with respect to parametrization
-    :param y: symbol corresponding to $\beta$/charge with respect to parametrization
-    :param Liouville_parametrization: if true expresses h and c in terms of a and b (with respect to known parametrization)
+    :param x: symbol corresponding to energy
+    :param y: symbol corresponding to charge
     :return: matrix of Kac-Shapovalov form on n-th level
     '''
     partitions = list(sp.utilities.iterables.ordered_partitions(N))[::-1]
     if debug:
         print("partitions: ", partitions)
-    return sp.Matrix(len(partitions), len(partitions), lambda i,j: sp.factor(Kac_Matrix_element(partitions[i], partitions[j], x, y, Liouville_parametrization)))
+    return sp.Matrix(len(partitions), len(partitions), lambda i,j: sp.simplify(Kac_Matrix_element(partitions[i], partitions[j], x, y)))
 
-Liouville_parametrization = ('-L' in sys.argv[1:])
-if Liouville_parametrization:
-    print("Enter a")
-    a = input()
-    if not a.isnumeric():
-        a = sp.symbols(a)
-    else:
-        a = float(a)
-    print("Enter b")
-    b = input()
-    if not b.isnumeric():
-        b = sp.symbols(b)
-    else:
-        b = float(b)
 
-    print("Enter level")
-    print(Kac_matrix(int(input()), a, b, True))
-else:
-    print("Enter symbolycal expression for weight (energy)")
-    h = input()
-    if not h.isnumeric():
-        h = sp.symbols(h)
+def Liouville_parametrization_inp():
+    '''
+    Manage input if Liouville parametrization required
+    :return: N - number of level considering, h - 
+    '''
+    b = sp.symbols('b')
+    if '-s' in sys.argv[1:]:
+        print("Enter m")
+        m = int(input())
+        print("Enter n")
+        n = int(input())
+        N = m*n
+        a = -((m - 1)*b/2 + (n - 1)/(2*b))
     else:
-        h = float(h)
-    print("Enter symbolical expression for charge")
-    c = input()
-    if not c.isnumeric():
-        c = sp.symbols(c)
+        a = sp.symbols('a')
+        print("Enter level")
+        N = int(input())
+    h = a*((b + 1/b)-a)
+    c = 1+6*(b + 1/b)**2
+    return N, h, c
+
+
+def main():
+    if '-d' in sys.argv[1:]:
+        debug = True
+    if '-L' in sys.argv[1:]:
+        N, h, c = Liouville_parametrization_inp()
     else:
-        c = float(c)
-    print("Enter level")
-    print(Kac_matrix(int(input()), h, c, False))
+        h = sp.symbols('h')
+        c = sp.symbols('c')
+        print("Enter level")
+        N = int(input())
+    M = Kac_matrix(N, h, c)
+    print("Kac-Shapovalov form on level ", N, ":\n", M)
+    if ('-L' in sys.argv[1:]) and ('-s' in sys.argv[1:]):
+        print("Singular vectors:\n", M.nullspace())
+
+if __name__ == "__main__":
+    main()

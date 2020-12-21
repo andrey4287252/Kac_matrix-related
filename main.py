@@ -3,6 +3,7 @@ import sys
 
 debug = False
 
+
 def Kac_Matrix_element(m, l, x, y):
     '''
     Agregates given partitions m and l to one list and computes corresponding element of Kac-Shapovalov matrix
@@ -10,6 +11,7 @@ def Kac_Matrix_element(m, l, x, y):
     :param l: second partition
     :param x: symbol corresponding energy
     :param y: symbol corresponding charge
+    :return: symbolycal expression for Kac-Shapovalov matrix element corresponding partitions given
     '''
     L = list(map(int, l)) + list(map(lambda x: -int(x),  m))[::-1]
     return Auxilary_Kac_Matrix_element(L, x, y)
@@ -53,7 +55,7 @@ def Kac_matrix(N, x, y):
     :param y: symbol corresponding to charge
     :return: matrix of Kac-Shapovalov form on n-th level
     '''
-    partitions = list(sp.utilities.iterables.ordered_partitions(N))[::-1]
+    partitions = sorted([p[::-1] for p in list(sp.utilities.iterables.ordered_partitions(N))], reverse=True)
     if debug:
         print("partitions: ", partitions)
     return sp.Matrix(len(partitions), len(partitions), lambda i,j: sp.simplify(Kac_Matrix_element(partitions[i], partitions[j], x, y)))
